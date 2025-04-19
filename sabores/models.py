@@ -193,7 +193,7 @@ class Productos(models.Model):
         db_table = 'productos'
         
     def __str__(self):
-        return self.nombre, self.categoria, self.precio, self.cantidad_actual, self.cantidad_inicial, self.foto, self.proveedorid
+        return '{} {} {} {} {} {} {}'.format(self.nombre, self.categoria, self.precio, self.cantidad_actual, self.cantidad_inicial, self.foto, self.proveedorid)
 
 
 class Proveedores(models.Model):
