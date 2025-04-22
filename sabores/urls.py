@@ -11,6 +11,4 @@ router.register(r'usuarios', authView.UserView,'usuarios')
 
 urlpatterns = [
     path("api/v1/",include(router.urls)),
-    path("/api/v1/usuarios/login/", authView.UserView.as_view({"post": "login"})),
-    
 ]
