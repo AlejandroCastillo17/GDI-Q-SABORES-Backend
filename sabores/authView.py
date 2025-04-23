@@ -10,10 +10,8 @@ from rest_framework.decorators import action
 from rest_framework import viewsets
 
 class UserView(viewsets.ModelViewSet):
-    # queryset = User.objects.all()
+    
     serializer_class = UserSerializer
-    # permission_classes = False
-    # authentication_classes = False
 
     @action(detail=False, methods=['POST'])
     def login(self, request):

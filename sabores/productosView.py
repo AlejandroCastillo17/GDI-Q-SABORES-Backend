@@ -1,6 +1,6 @@
 from rest_framework import viewsets, filters
 from .models import Productos, Proveedores
-from .serializer import ProductosSerializer
+from .serializer import ProductosSerializer, ProveedoresSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import action
@@ -9,14 +9,14 @@ from rest_framework import status
 
 
 class ProductoView(viewsets.ModelViewSet):
-    queryset = Productos.objects.all()
+    queryset = Productos.objects.select_related("proveedorid").all()
     serializer_class = ProductosSerializer
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     filter_backends = [filters.SearchFilter]
-    search_fields = ['nombre', 'categoria',] # 'proveedorid'
+    search_fields = ['nombre', 'categoria', "proveedorid__nombre"] # ''
 
     @action(detail=False, methods=['POST'])
     def eliminar_productos(self, request):

@@ -5,8 +5,8 @@ from django.contrib.auth.models import User
 
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Usuario, Proveedores
-        fields = ['__all__', Proveedores.nombre]
+        model = Usuario
+        fields = ['__all__']
 
 class ProveedoresSerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,10 +14,23 @@ class ProveedoresSerializer(serializers.ModelSerializer):
         fields = ['id', 'nombre']
         
 class ProductosSerializer(serializers.ModelSerializer):
-    proveedores = ProveedoresSerializer(read_only=True)
+    proveedorid = serializers.PrimaryKeyRelatedField(
+        queryset=Proveedores.objects.all(), 
+        write_only=True) 
+    proveedor = ProveedoresSerializer(source='proveedorid', read_only=True)
+
     class Meta:
         model = Productos
-        fields = ['__all__', "proveedores"] 
+        fields = ['id',
+            'nombre',
+            'categoria',
+            'precio',
+            'cantidad_actual',
+            'cantidad_inicial',
+            'foto',
+            'topeMin',
+            'proveedorid',
+            'proveedor']
 
     def validate(self, data):
         nombre = data.get('nombre')
