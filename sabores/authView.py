@@ -17,10 +17,10 @@ class UserView(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['POST'])
     def login(self, request):
-        request.data["username"] = "sabores"
-        user = get_object_or_404(User, username=request.data["username"])
+        request.data["nombre"] = "sabores"
+        user = get_object_or_404(User, username=request.data["nombre"])
 
-        if not user.check_password(request.data["password"]):
+        if not user.check_password(request.data["contrasena"]):
             return Response({"error: " "Invalid password"}, status=status.HTTP_400_BAD_REQUEST)
         
         token, created = Token.objects.get_or_create(user=user)

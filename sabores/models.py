@@ -179,22 +179,6 @@ class DjangoSession(models.Model):
         db_table = 'django_session'
 
 
-class Productos(models.Model):
-    nombre = models.CharField(max_length=30)
-    categoria = models.CharField(max_length=20)
-    precio = models.DecimalField(max_digits=10, decimal_places=2)
-    cantidad_actual = models.IntegerField()
-    cantidad_inicial = models.IntegerField()
-    foto = models.TextField(blank=True, null=True)
-    proveedorid = models.ForeignKey('Proveedores', models.DO_NOTHING, db_column='proveedorId')  # Field name made lowercase.
-
-    class Meta:
-        managed = False
-        db_table = 'productos'
-        
-    def __str__(self):
-        return '{} {} {} {} {} {} {}'.format(self.nombre, self.categoria, self.precio, self.cantidad_actual, self.cantidad_inicial, self.foto, self.proveedorid)
-
 
 class Proveedores(models.Model):
     nombre = models.CharField(max_length=20)
@@ -204,3 +188,21 @@ class Proveedores(models.Model):
     class Meta:
         managed = False
         db_table = 'proveedores'
+
+class Productos(models.Model):
+    nombre = models.CharField(max_length=30)
+    categoria = models.CharField(max_length=20)
+    precio = models.DecimalField(max_digits=10, decimal_places=2)
+    cantidad_actual = models.IntegerField()
+    cantidad_inicial = models.IntegerField()
+    foto = models.TextField(blank=True, null=True)
+    proveedorid = models.ForeignKey(Proveedores, models.DO_NOTHING, db_column='proveedorId')  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'productos'
+        
+    def __str__(self):
+        return '{} {} {} {} {} {} {}'.format(self.nombre, self.categoria, self.precio, self.cantidad_actual, self.cantidad_inicial, self.foto, self.proveedorid)
+
+

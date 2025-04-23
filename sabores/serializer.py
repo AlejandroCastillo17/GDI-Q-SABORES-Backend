@@ -1,17 +1,23 @@
 from rest_framework import serializers
-from .models import Usuario
+from .models import Usuario, Proveedores
 from .models import Productos
 from django.contrib.auth.models import User
 
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Usuario
-        fields = '__all__'
+        model = Usuario, Proveedores
+        fields = ['__all__', Proveedores.nombre]
+
+class ProveedoresSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Proveedores
+        fields = ['id', 'nombre']
         
 class ProductosSerializer(serializers.ModelSerializer):
+    proveedores = ProveedoresSerializer(read_only=True)
     class Meta:
         model = Productos
-        fields = '__all__'
+        fields = ['__all__', "proveedores"] 
 
     def validate(self, data):
         nombre = data.get('nombre')
