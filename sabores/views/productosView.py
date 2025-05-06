@@ -16,7 +16,7 @@ class ProductoView(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     filter_backends = [filters.SearchFilter]
-    search_fields = ['nombre', 'categoria', "proveedorid__nombre"] # ''
+    search_fields = ['nombre', 'categoriaid__nombre', "proveedorid__nombre"] # ''
 
     @action(detail=False, methods=['POST'])
     def eliminar_productos(self, request):
