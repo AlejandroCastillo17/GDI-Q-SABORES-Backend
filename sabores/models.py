@@ -2,10 +2,10 @@ from django.db import models
 
 
 class Gastos(models.Model):
-    id = models.IntegerField(primary_key=True)
     nombre = models.CharField(max_length=50)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
-    constante = models.IntegerField()
+    estado = models.CharField(max_length=20)
+    fecha_de_pago = models.DateField()
 
     class Meta:
         managed = False
@@ -179,6 +179,16 @@ class DjangoSession(models.Model):
         db_table = 'django_session'
 
 
+
+class Proveedores(models.Model):#Qué con los proveedores con varios numeros
+    nombre = models.CharField(max_length=20)
+    telefono = models.CharField(max_length=11, blank=True, null=False)
+    email = models.CharField(max_length=250, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'proveedores'
+
 class Productos(models.Model):
     nombre = models.CharField(max_length=30)
     categoria = models.CharField(max_length=20)
@@ -186,21 +196,14 @@ class Productos(models.Model):
     cantidad_actual = models.IntegerField()
     cantidad_inicial = models.IntegerField()
     foto = models.TextField(blank=True, null=True)
-    proveedorid = models.ForeignKey('Proveedores', models.DO_NOTHING, db_column='proveedorId')  # Field name made lowercase.
+    topeMin = models.IntegerField()
+    proveedorid = models.ForeignKey(Proveedores, models.DO_NOTHING, db_column='proveedorId', related_name="productos") 
 
     class Meta:
         managed = False
         db_table = 'productos'
         
     def __str__(self):
-        return self.nombre, self.categoria, self.precio, self.cantidad_actual, self.cantidad_inicial, self.foto, self.proveedorid
+        return '{} {} {} {} {} {} {}'.format(self.nombre, self.categoria, self.precio, self.cantidad_actual, self.cantidad_inicial, self.foto, self.proveedorid, self.topeMin)
 
 
-class Proveedores(models.Model):
-    nombre = models.CharField(max_length=20)
-    telefono = models.CharField(max_length=11, blank=True, null=True)
-    email = models.CharField(max_length=50)
-
-    class Meta:
-        managed = False
-        db_table = 'proveedores'
