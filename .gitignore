@@ -5,5 +5,7 @@
 *.venv/
 *.pyc
 *pyc
-*backend/*.pyc
-*backend/*pyc
+backend/*.pyc
+backend/*pyc
+sabores/*.pyc
+sabores/*pyc
