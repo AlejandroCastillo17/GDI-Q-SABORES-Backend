@@ -1,2 +1,9 @@
 *venv
 *venv/
+*venv
+*.venv
+*.venv/
+*.pyc
+*pyc
+*backend/*.pyc
+*backend/*pyc
