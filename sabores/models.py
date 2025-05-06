@@ -2,10 +2,10 @@ from django.db import models
 
 
 class Gastos(models.Model):
-    id = models.IntegerField(primary_key=True)
     nombre = models.CharField(max_length=50)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
-    constante = models.IntegerField()
+    estado = models.CharField(max_length=20)
+    fecha_de_pago = models.DateField()
 
     class Meta:
         managed = False
@@ -180,10 +180,10 @@ class DjangoSession(models.Model):
 
 
 
-class Proveedores(models.Model):
+class Proveedores(models.Model):#Qué con los proveedores con varios numeros
     nombre = models.CharField(max_length=20)
-    telefono = models.CharField(max_length=11, blank=True, null=True)
-    email = models.CharField(max_length=50)
+    telefono = models.CharField(max_length=11, blank=True, null=False)
+    email = models.CharField(max_length=250, null=True)
 
     class Meta:
         managed = False
