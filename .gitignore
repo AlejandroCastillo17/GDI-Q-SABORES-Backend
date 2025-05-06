@@ -5,7 +5,4 @@
 *.venv/
 *.pyc
 *pyc
-backend/*.pyc
-backend/*pyc
-sabores/*.pyc
-sabores/*pyc
+__pycache__/
