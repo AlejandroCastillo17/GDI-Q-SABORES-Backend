@@ -1,4 +1,4 @@
-from .serializer import ProductosSerializer
+from .serializers.serializer import ProductosSerializer
 from rest_framework.decorators import api_view, authentication_classes, permission_classes, action
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
