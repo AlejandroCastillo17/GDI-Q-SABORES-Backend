@@ -179,8 +179,20 @@ class DjangoSession(models.Model):
         db_table = 'django_session'
 
 
+class Categorias(models.Model):#Qué con los proveedores con varios numeros
+    id = models.BigAutoField(primary_key=True)
+    nombre = models.CharField(max_length=20)
+    
+    class Meta:
+        managed = False
+        db_table = 'Categorias'
+
+    def __str__(self):
+        return '{}'.format(self.nombre)
+
 
 class Proveedores(models.Model):#Qué con los proveedores con varios numeros
+    id = models.BigAutoField(primary_key=True)
     nombre = models.CharField(max_length=20)
     telefono = models.CharField(max_length=11, blank=True, null=False)
     email = models.CharField(max_length=250, null=True)
@@ -188,22 +200,25 @@ class Proveedores(models.Model):#Qué con los proveedores con varios numeros
     class Meta:
         managed = False
         db_table = 'proveedores'
+    
+    def __str__(self):
+        return '{}'.format(self.nombre, self.telefono, self.email)
 
 class Productos(models.Model):
     nombre = models.CharField(max_length=30)
-    categoria = models.CharField(max_length=20)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     cantidad_actual = models.IntegerField()
     cantidad_inicial = models.IntegerField()
     foto = models.TextField(blank=True, null=True)
     topeMin = models.IntegerField()
-    proveedorid = models.ForeignKey(Proveedores, models.DO_NOTHING, db_column='proveedorId', related_name="productos") 
+    proveedorid = models.ForeignKey(Proveedores, models.DO_NOTHING, db_column='proveedorId', related_name="productos")
+    categoriaid = models.ForeignKey(Categorias, models.DO_NOTHING, db_column='categoriaId', related_name="productos") 
 
     class Meta:
         managed = False
         db_table = 'productos'
         
     def __str__(self):
-        return '{} {} {} {} {} {} {}'.format(self.nombre, self.categoria, self.precio, self.cantidad_actual, self.cantidad_inicial, self.foto, self.proveedorid, self.topeMin)
+        return '{} {} {} {} {} {} {}'.format(self.nombre, self.precio, self.cantidad_actual, self.cantidad_inicial, self.foto, self.proveedorid, self.categoriaid, self.topeMin)
 
 
