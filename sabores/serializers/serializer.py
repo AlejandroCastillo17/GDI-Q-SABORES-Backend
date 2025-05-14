@@ -2,16 +2,17 @@ from rest_framework import serializers
 from ..models import Usuario, Proveedores, Categorias
 from ..models import Productos
 from django.contrib.auth.models import User
+from .proveedoresSerializer import ProveedoresSerializer
 
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
         fields = ['__all__']
 
-class ProveedoresSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Proveedores
-        fields = ['id', 'nombre']
+# class ProveedoresSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Proveedores
+#         fields = ['id', 'nombre']
         
 class ProductosSerializer(serializers.ModelSerializer):
     proveedorid = serializers.PrimaryKeyRelatedField(
