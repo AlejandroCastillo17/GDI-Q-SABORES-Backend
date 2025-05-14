@@ -105,27 +105,33 @@ class AuthUserUserPermissions(models.Model):
 
 class Compras(models.Model):
     fecha = models.DateField()
+    idproveedor = models.ForeignKey('Proveedores', models.DO_NOTHING, db_column='idProveedor') 
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
         managed = False
         db_table = 'compras'
 
+    def __str__(self):
+        return '{} {} {}'.format(self.fecha, self.idproveedor, self.subtotal)
 
-class Detallescompras(models.Model):
-    idcompra = models.ForeignKey(Compras, models.DO_NOTHING, db_column='idCompra')  # Field name made lowercase.
-    idproveedor = models.ForeignKey('Proveedores', models.DO_NOTHING, db_column='idProveedor')  # Field name made lowercase.
-    idproducto = models.ForeignKey('Productos', models.DO_NOTHING, db_column='idProducto')  # Field name made lowercase.
+
+
+class DetallesCompras(models.Model):
+    idcompra = models.ForeignKey(Compras, models.DO_NOTHING, db_column='idCompra')
+    idproducto = models.ForeignKey('Productos', models.DO_NOTHING, db_column='idProducto')
     cantidad = models.IntegerField()
 
     class Meta:
         managed = False
         db_table = 'detallesCompras'
 
+    def __str__(self):
+        return '{} {} {}'.format(self.idcompra, self.idproducto, self.cantidad)
 
 class Detallesventas(models.Model):
-    idventa = models.ForeignKey(Ventas, models.DO_NOTHING, db_column='idVenta')  # Field name made lowercase.
-    idproducto = models.ForeignKey('Productos', models.DO_NOTHING, db_column='idProducto')  # Field name made lowercase.
+    idventa = models.ForeignKey(Ventas, models.DO_NOTHING, db_column='idVenta')
+    idproducto = models.ForeignKey('Productos', models.DO_NOTHING, db_column='idProducto')
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
     cantidad = models.IntegerField()
 
