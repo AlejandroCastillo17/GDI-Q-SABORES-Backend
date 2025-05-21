@@ -12,7 +12,7 @@ from django.db import transaction
 
 class ComprasView(viewsets.ModelViewSet):
     queryset = Compras.objects.all()
-    serializer_class = DetallesCompras 
+    serializer_class = ComprasSerializer 
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -30,7 +30,7 @@ class ComprasView(viewsets.ModelViewSet):
                 subtotal=data['subtotal'],
                 idproveedor_id=detalle['idproveedor'],
             )
-            detalles = data.get('detalles', [])
+            detalles = data.get('detallesCompras', [])
             for detalle in detalles:
                 DetallesCompras.objects.create(
                     idproducto_id=detalle['idproducto'],

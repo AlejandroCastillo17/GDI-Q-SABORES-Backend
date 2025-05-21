@@ -8,7 +8,7 @@ class Gastos(models.Model):
     fecha_de_pago = models.DateField()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'Gastos'
 
 
@@ -18,7 +18,7 @@ class Usuario(models.Model):
     contrasena = models.CharField(max_length=50)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'Usuario'
         
     def __str__(self):
@@ -30,7 +30,7 @@ class Ventas(models.Model):
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'Ventas'
 
 
@@ -109,7 +109,7 @@ class Compras(models.Model):
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'compras'
 
     def __str__(self):
@@ -123,20 +123,20 @@ class DetallesCompras(models.Model):
     cantidad = models.IntegerField()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'detallesCompras'
 
     def __str__(self):
         return '{} {} {}'.format(self.idcompra, self.idproducto, self.cantidad)
 
-class Detallesventas(models.Model):
+class DetallesVentas(models.Model):
     idventa = models.ForeignKey(Ventas, models.DO_NOTHING, db_column='idVenta')
     idproducto = models.ForeignKey('Productos', models.DO_NOTHING, db_column='idProducto')
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
     cantidad = models.IntegerField()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'detallesVentas'
 
 
@@ -190,7 +190,7 @@ class Categorias(models.Model):#Qué con los proveedores con varios numeros
     nombre = models.CharField(max_length=20)
     
     class Meta:
-        managed = False
+        managed = True
         db_table = 'Categorias'
 
     def __str__(self):
@@ -204,7 +204,7 @@ class Proveedores(models.Model):#Qué con los proveedores con varios numeros
     email = models.CharField(max_length=250, null=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'proveedores'
     
     def __str__(self):
@@ -221,7 +221,7 @@ class Productos(models.Model):
     categoriaid = models.ForeignKey(Categorias, models.DO_NOTHING, db_column='categoriaId', related_name="productos") 
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'productos'
         
     def __str__(self):

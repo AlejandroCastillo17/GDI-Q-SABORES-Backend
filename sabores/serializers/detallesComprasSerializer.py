@@ -1,15 +1,15 @@
 from rest_framework import serializers
-from ..models import DetallesCompras, Compras, Productos
-from .comprasSerializer import ComprasSerializer
+from ..models import DetallesCompras,Productos, Compras
+# from .comprasSerializer import ComprasSerializer
 from .serializer import ProductosSerializer
 
         
 class DetallesComprasSerializer(serializers.ModelSerializer):
 
-    idcompras = serializers.PrimaryKeyRelatedField(
-        queryset=Compras.objects.all(), 
-        write_only=True) 
-    compras = ComprasSerializer(source='idcompras', read_only=True)
+    # idcompras = serializers.PrimaryKeyRelatedField(
+    #     queryset=Compras.objects.all(), 
+    #     write_only=True) 
+    # compras = ComprasSerializer(source='idcompras', read_only=True)
 
     idproducto = serializers.PrimaryKeyRelatedField(
         queryset=Productos.objects.all(), write_only=True) 
@@ -17,6 +17,6 @@ class DetallesComprasSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DetallesCompras
-        fields = ["id","idcompras", "compras", "idproducto", "producto", "cantidad"]
+        fields = ["id", "idproducto", "producto", "cantidad"]#"idcompras", "compras",
 
     
