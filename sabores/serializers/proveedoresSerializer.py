@@ -7,7 +7,9 @@ class ProveedoresSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Proveedores
-        fields = ["id","nombre", "telefono", "email"]
+        fields = ["nombre", "telefono", "email"]
+        read_only_fields = ["id"]
+
 
     def validate(self, data):
         nombre = data.get('nombre')
