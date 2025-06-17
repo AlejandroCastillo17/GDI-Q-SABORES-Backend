@@ -104,9 +104,7 @@ DATABASES = {
        'PASSWORD': 'fzJvSmmEZSndmjOrARyukIrlUFVEWqmM',
        'HOST': 'metro.proxy.rlwy.net',  # Usa el valor real de RAILWAY_PRIVATE_DOMAIN
        'PORT': '28745',
- }
-
-        
+    }
 }
 
 

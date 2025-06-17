@@ -9,7 +9,6 @@ class GastosSerializer(serializers.ModelSerializer):
     class Meta:
         model = Gastos
         fields = '__all__'
-        read_only_fields = ["id"]
 
 
     # def validate(self, data):
