@@ -27,8 +27,7 @@ class ProductosSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Productos
-        fields = ['id',
-            'nombre',
+        fields = ['nombre',
             'precio',
             'cantidad_actual',
             'cantidad_inicial',
@@ -38,6 +37,8 @@ class ProductosSerializer(serializers.ModelSerializer):
             'categoria',
             'proveedorid',
             'proveedor']
+        read_only_fields = ["id"]
+        
 
     def validate(self, data):
         nombre = data.get('nombre')

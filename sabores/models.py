@@ -25,15 +25,6 @@ class Usuario(models.Model):
         return self.nombre, self.contrasena, self.id
 
 
-class Ventas(models.Model):
-    fecha = models.DateField()
-    subtotal = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-
-    class Meta:
-        managed = True
-        db_table = 'Ventas'
-
-
 class AuthGroup(models.Model):
     name = models.CharField(unique=True, max_length=150)
 
@@ -114,11 +105,10 @@ class Compras(models.Model):
 
     def __str__(self):
         return '{} {} {}'.format(self.fecha, self.idproveedor, self.subtotal)
-
-
+    
 
 class DetallesCompras(models.Model):
-    idcompra = models.ForeignKey(Compras, models.DO_NOTHING, db_column='idCompra')
+    idcompra = models.ForeignKey(Compras, models.DO_NOTHING, db_column='idCompra', related_name='detallesCompra')
     idproducto = models.ForeignKey('Productos', models.DO_NOTHING, db_column='idProducto')
     cantidad = models.IntegerField()
 
@@ -129,8 +119,19 @@ class DetallesCompras(models.Model):
     def __str__(self):
         return '{} {} {}'.format(self.idcompra, self.idproducto, self.cantidad)
 
+class Ventas(models.Model):
+    fecha = models.DateField()
+    total = models.DecimalField(max_digits=10, decimal_places=2, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'Ventas'
+
+    def __str__(self):
+        return '{} {}'.format(self.fecha, self.total)
+
 class DetallesVentas(models.Model):
-    idventa = models.ForeignKey(Ventas, models.DO_NOTHING, db_column='idVenta')
+    idventa = models.ForeignKey(Ventas, models.DO_NOTHING, db_column='idVenta', related_name="detallesVentas")
     idproducto = models.ForeignKey('Productos', models.DO_NOTHING, db_column='idProducto')
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
     cantidad = models.IntegerField()
@@ -138,6 +139,10 @@ class DetallesVentas(models.Model):
     class Meta:
         managed = True
         db_table = 'detallesVentas'
+
+    def __str__(self):
+        return '{} {} {} {}'.format(self.idventa, self.idproducto, self.cantidad, self.subtotal)
+
 
 
 class DjangoAdminLog(models.Model):
