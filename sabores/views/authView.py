@@ -15,7 +15,7 @@ class UserView(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['POST'])
     def login(self, request):
-        request.data["nombre"] = "sabores"
+        request.data["nombre"] = "Qsabores"
         user = get_object_or_404(User, username=request.data["nombre"])
 
         if not user.check_password(request.data["contrasena"]):

@@ -121,7 +121,7 @@ class DetallesCompras(models.Model):
 
 class Ventas(models.Model):
     fecha = models.DateField()
-    total = models.DecimalField(max_digits=10, decimal_places=2, blank=True)
+    total = models.DecimalField(max_digits=10, decimal_places=2, blank=True,default=0.00)
 
     class Meta:
         managed = True
