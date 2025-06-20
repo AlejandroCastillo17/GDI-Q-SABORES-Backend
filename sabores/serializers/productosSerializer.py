@@ -4,20 +4,10 @@ from ..models import Productos
 from django.contrib.auth.models import User
 from .proveedoresSerializer import ProveedoresSerializer
 
-class UsuarioSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Usuario
-        fields = ['__all__']
-
-# class ProveedoresSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Proveedores
-#         fields = ['id', 'nombre']
         
 class ProductosSerializer(serializers.ModelSerializer):
     proveedorid = serializers.PrimaryKeyRelatedField(
-        queryset=Proveedores.objects.all(), 
-        write_only=True) 
+        queryset=Proveedores.objects.all()) 
     proveedor = ProveedoresSerializer(source='proveedorid', read_only=True)
 
     categoriaid = serializers.PrimaryKeyRelatedField(
@@ -57,10 +47,23 @@ class ProductosSerializer(serializers.ModelSerializer):
         return data
     
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["id", "username", "password"]
-        extra_kwargs = {
-            'password': {'write_only': True}
-        }
+    def reducir_cantidad_inventario(idproducto, cantidad_reducir):
+        producto = Productos.objects.get(id=idproducto)
+
+        if producto:
+            producto.cantidad_actual = producto.cantidad_actual - cantidad_reducir
+
+            producto.save()
+        else:
+         raise serializers.ValidationError("No existe ese producto con eses caracteristicas")
+        
+    
+    def guardarTopeMinim(idproducto, cantidad_reducir):
+        producto = Productos.objects.get(id=idproducto)
+
+        if producto:
+            producto.cantidad_actual = producto.cantidad_actual - cantidad_reducir
+
+            producto.save()
+        else:
+         raise serializers.ValidationError("No existe ese producto con eses caracteristicas")

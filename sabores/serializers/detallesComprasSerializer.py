@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from ..models import DetallesCompras,Productos, Compras
 # from .comprasSerializer import ComprasSerializer
-from .serializer import ProductosSerializer
+from .productosSerializer import ProductosSerializer
 
         
 class DetallesComprasSerializer(serializers.ModelSerializer):

@@ -1,6 +1,6 @@
 from rest_framework import viewsets, filters
 from ..models import Productos
-from ..serializers.serializer import ProductosSerializer
+from ..serializers.productosSerializer import ProductosSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import action

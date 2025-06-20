@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from ..models import Ventas, DetallesVentas
-from .proveedoresSerializer import ProveedoresSerializer
+from ..models import Ventas, DetallesVentas, Productos
+from .productosSerializer import ProductosSerializer
 from .detallesVentasSerializer import DetallesVentasSerializer
 
 class VentasSerializer(serializers.ModelSerializer):
@@ -9,23 +9,8 @@ class VentasSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ventas
-        fields = ["id","fecha","total", "detallesVentas"]
-        # fields = ["id", "idproveedor", "proveedor", "subtotal", "fecha", "detallesCompra"]
+        fields = ["id", "fecha", "total", "detallesVentas"]
 
-
-    # def validate(self, data):
-    #     idproveedor = data.get('idproveedor')
-    #     subtotal = data.get('subtotal')
-    #     fecha = data.get('fecha')
-
-    #     instance_id = self.instance.id if self.instance else None
-
-    #     if Ventas.objects.filter(
-    #         idproveedor=idproveedor, subtotal=subtotal, fecha=fecha
-    #     ).exclude(id=instance_id).exists():
-    #         raise serializers.ValidationError("Ya existe una compra con esos campos")
-
-    #     return data
 
     def create(self, validated_data):
         detalles_data = validated_data.pop('detallesVentas')
@@ -33,13 +18,19 @@ class VentasSerializer(serializers.ModelSerializer):
         total = 0
 
         for detalle in detalles_data:
-            producto = detalle['idproducto']
+            producto = detalle["idproducto"]
             cantidad = detalle['cantidad']
-            total += producto.precio * cantidad
 
-        ventas = Ventas.objects.create(**validated_data)
+            total = total + (producto.precio * cantidad)
+
+        ventas = Ventas.objects.create(**validated_data, total=total)
 
         for detalle in detalles_data:
             DetallesVentas.objects.create(idventa=ventas, **detalle)
+            producto = detalle['idproducto']
+            cantidad = detalle['cantidad']
+
+            ProductosSerializer.reducir_cantidad_inventario(producto.id, cantidad)
+
 
         return ventas

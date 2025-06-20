@@ -1,4 +1,4 @@
-from ..serializers.serializer import UserSerializer 
+from ..serializers.UsuariosSerializer import UserSerializer 
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework import status
@@ -25,8 +25,3 @@ class UserView(viewsets.ModelViewSet):
         serializer = UserSerializer(instance=user)
 
         return Response({"token": token.key, "user": serializer.data}, status=status.HTTP_200_OK);
-
-
-
-# @api_view(["POST"])
-# def login(request):
