@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import Usuario, Proveedores, Categorias
+from ..models import Proveedores, Categorias
 from ..models import Productos
 from django.contrib.auth.models import User
 from .proveedoresSerializer import ProveedoresSerializer
@@ -55,15 +55,15 @@ class ProductosSerializer(serializers.ModelSerializer):
 
             producto.save()
         else:
-         raise serializers.ValidationError("No existe ese producto con eses caracteristicas")
+         raise serializers.ValidationError("No existe ese producto con esas caracteristicas")
         
     
-    def guardarTopeMinim(idproducto, cantidad_reducir):
-        producto = Productos.objects.get(id=idproducto)
+    # def guardar_tope_minim(idproducto):
+    #     producto = Productos.objects.get(id=idproducto)
 
-        if producto:
-            producto.cantidad_actual = producto.cantidad_actual - cantidad_reducir
+    #     if producto:
+    #         producto.cantidad_actual = producto.cantidad_actual - cantidad_reducir
 
-            producto.save()
-        else:
-         raise serializers.ValidationError("No existe ese producto con eses caracteristicas")
+    #         producto.save()
+    #     else:
+    #      raise serializers.ValidationError("No existe ese producto con eses caracteristicas")

@@ -1,7 +1,7 @@
 from rest_framework import routers
 from django.urls import path,include
 
-from sabores.views import authView, comprasView, productosView, gastosView, proveedoresView, categoriasView, ventasView
+from sabores.views import authView, comprasView, productosView, gastosView, proveedoresView, categoriasView, ventasView, notificacionesView
 
 
 router = routers.DefaultRouter()
@@ -12,6 +12,8 @@ router.register(r'proveedores', proveedoresView.ProveedoresView,'proveedores')
 router.register(r'categorias', categoriasView.CategoriasView,'categorias')
 router.register(r'compras', comprasView.ComprasView,'compras')
 router.register(r'ventas', ventasView.VentasView,'ventas')
+router.register(r'notificaciones', notificacionesView.NotificacionView)
+
 
 urlpatterns = [
     path("api/v1/",include(router.urls)),
