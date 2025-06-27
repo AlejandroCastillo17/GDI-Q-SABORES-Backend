@@ -5,6 +5,12 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
+
 from rest_framework.decorators import action
 
 from rest_framework import viewsets
@@ -25,3 +31,14 @@ class UserView(viewsets.ModelViewSet):
         serializer = UserSerializer(instance=user)
 
         return Response({"token": token.key, "user": serializer.data}, status=status.HTTP_200_OK);
+
+
+    @action(detail=False, methods=['post'], url_path='logout')
+    def logout(self, request):
+        try:
+            token = Token.objects.get(user_id=request.user.id)
+            print(token)
+            token.delete()
+            return Response({"detail": "Sesión cerrada correctamente"}, status=status.HTTP_200_OK)
+        except Token.DoesNotExist:
+            return Response({"detail": "Token no encontrado"}, status=status.HTTP_400_BAD_REQUEST)
