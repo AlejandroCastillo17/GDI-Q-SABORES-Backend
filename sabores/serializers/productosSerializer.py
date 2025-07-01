@@ -32,20 +32,22 @@ class ProductosSerializer(serializers.ModelSerializer):
         
 
     def validate(self, data):
-        nombre = data.get('nombre')
-        categoriaid = data.get('categoriaid')
-        proveedorid = data.get('proveedorid')
+        try:
+            nombre = data.get('nombre')
+            categoriaid = data.get('categoriaid')
+            proveedorid = data.get('proveedorid')
 
-        # Al actualizar, excluirse a sí mismo de la validación
-        instance_id = self.instance.id if self.instance else None
+            # Al actualizar, excluirse a sí mismo de la validación
+            instance_id = self.instance.id if self.instance else None
 
-        if Productos.objects.filter(
-            nombre=nombre, categoriaid=categoriaid, proveedorid=proveedorid
-        ).exclude(id=instance_id).exists():
-            raise serializers.ValidationError("Ya existe un producto con ese nombre, categoría y proveedor.")
-        
-        return data
-    
+            if Productos.objects.filter(
+                nombre=nombre, categoriaid=categoriaid, proveedorid=proveedorid
+            ).exclude(id=instance_id).exists():
+                raise serializers.ValidationError("Ya existe un producto con ese nombre, categoría y proveedor.")
+            
+            return data
+        except Exception as e:
+            return e
 
     def reducir_cantidad_inventario(idproducto, cantidad_reducir):
         producto = Productos.objects.get(id=idproducto)

@@ -17,32 +17,38 @@ class ComprasSerializer(serializers.ModelSerializer):
 
 
     def validate(self, data):
-        idproveedor = data.get('idproveedor')
-        subtotal = data.get('subtotal')
-        fecha = data.get('fecha')
+        try:
+            idproveedor = data.get('idproveedor')
+            subtotal = data.get('subtotal')
+            fecha = data.get('fecha')
 
-        instance_id = self.instance.id if self.instance else None
+            instance_id = self.instance.id if self.instance else None
 
-        if Compras.objects.filter(
-            idproveedor=idproveedor, subtotal=subtotal, fecha=fecha
-        ).exclude(id=instance_id).exists():
-            raise serializers.ValidationError("Ya existe una compra con esos campos")
+            if Compras.objects.filter(
+                idproveedor=idproveedor, subtotal=subtotal, fecha=fecha
+            ).exclude(id=instance_id).exists():
+                raise serializers.ValidationError("Ya existe una compra con esos campos")
 
-        return data
+            return data
+        except Exception as e:
+            return {"Error": e}
 
     def create(self, validated_data):
-        detalles_data = validated_data.pop('detallesCompra')  # quitar antes de crear Compra
+        try:
+            detalles_data = validated_data.pop('detallesCompra')  # quitar antes de crear Compra
 
-        subtotal = 0
+            subtotal = 0
 
-        for detalle in detalles_data:
-            producto = detalle['idproducto']
-            cantidad = detalle['cantidad']
-            subtotal += producto.precio * cantidad  # calcula subtotal
+            for detalle in detalles_data:
+                producto = detalle['idproducto']
+                cantidad = detalle['cantidad']
+                subtotal += producto.precio * cantidad  # calcula subtotal
 
-        compra = Compras.objects.create(**validated_data)
+            compra = Compras.objects.create(**validated_data)
 
-        for detalle in detalles_data:
-            DetallesCompras.objects.create(idcompra=compra, **detalle)
+            for detalle in detalles_data:
+                DetallesCompras.objects.create(idcompra=compra, **detalle)
 
-        return compra
+            return compra
+        except Exception as e:
+            return {"Error": e};

@@ -14,25 +14,29 @@ class NotificacionesSerializer(serializers.ModelSerializer):
 
     # @receiver(post_save, sender=Productos)
     def verificar_tope_minimo(producto):
-        print("Producto:", producto)
-        if producto.cantidad_actual <= producto.topeMin:
-            notificacion_existente = Notificaciones.objects.filter(
-                productoId=producto,
-                leida=False
-            ).exists()
+        try:
+            if producto.cantidad_actual <= producto.topeMin:
+                notificacion_existente = Notificaciones.objects.filter(
+                    productoId=producto,
+                    leida=False
+                ).exists()
 
-            if not notificacion_existente:
-                Notificaciones.objects.create(
-                    productoId=producto,
-                    mensaje=f"El producto '{producto.nombre}' ha alcanzado su tope mínimo, la cantidad actual es: ({producto.cantidad_actual})"
-                )
+                if not notificacion_existente:
+                    Notificaciones.objects.create(
+                        productoId=producto,
+                        mensaje=f"El producto '{producto.nombre}' ha alcanzado su tope mínimo, la cantidad actual es: ({producto.cantidad_actual})"
+                    )
+                else:
+                    Notificaciones.objects.update(
+                        productoId=producto,
+                        mensaje=f"El producto '{producto.nombre}' ha alcanzado su tope mínimo, la cantidad actual es: ({producto.cantidad_actual})"
+                    )
             else:
-                Notificaciones.objects.update(
+                Notificaciones.objects.filter(
                     productoId=producto,
-                    mensaje=f"El producto '{producto.nombre}' ha alcanzado su tope mínimo, la cantidad actual es: ({producto.cantidad_actual})"
-                )
-        else:
-            Notificaciones.objects.filter(
-                productoId=producto,
-                leida=False
-            ).update(leida=True)
+                    leida=False
+                ).update(leida=True)
+
+        except Exception as e:
+            print(e)
+            return e

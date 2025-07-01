@@ -20,7 +20,10 @@ class NotificacionView(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def marcar_leida(self, request, pk=None):
-        notificacion = self.get_object()
-        notificacion.leida = True
-        notificacion.save()
-        return Response({'status': 'notificación marcada como leída'})
+        try:
+            notificacion = self.get_object()
+            notificacion.leida = True
+            notificacion.save()
+            return Response({'status': 'notificación marcada como leída'})
+        except Exception as e:
+            return Response({'Error': e})
