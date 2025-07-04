@@ -121,7 +121,7 @@ class DetallesCompras(models.Model):
 
 class Ventas(models.Model):
     fecha = models.DateField()
-    total = models.DecimalField(max_digits=10, decimal_places=2, blank=True,default=0.00)
+    total = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=False)
 
     class Meta:
         managed = True
@@ -216,6 +216,7 @@ class Proveedores(models.Model):#Qué con los proveedores con varios numeros
         return '{}'.format(self.nombre, self.telefono, self.email)
 
 class Productos(models.Model):
+    id = models.BigAutoField(primary_key=True)
     nombre = models.CharField(max_length=30)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     cantidad_actual = models.IntegerField()
@@ -233,3 +234,15 @@ class Productos(models.Model):
         return '{} {} {} {} {} {} {}'.format(self.nombre, self.precio, self.cantidad_actual, self.cantidad_inicial, self.foto, self.proveedorid, self.categoriaid, self.topeMin)
 
 
+class Notificaciones(models.Model):
+    productoId = models.ForeignKey(Productos, models.DO_NOTHING, db_column='productoId')
+    mensaje = models.TextField()
+    fecha = models.DateTimeField(auto_now_add=True)
+    leida = models.BooleanField(default=False)
+    
+    class Meta:
+        managed = True
+        db_table = 'notificaciones'
+        
+    def __str__(self):
+        return '{} {} {} {}'.format(self.productoId, self.mensaje, self.fecha, self.leida)

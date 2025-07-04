@@ -1,7 +1,8 @@
 from rest_framework import serializers
-from ..models import Ventas, DetallesVentas
-from .proveedoresSerializer import ProveedoresSerializer
+from ..models import Ventas, DetallesVentas, Notificaciones
+from .productosSerializer import ProductosSerializer
 from .detallesVentasSerializer import DetallesVentasSerializer
+from .notificacionesSerializer import NotificacionesSerializer
 
 class VentasSerializer(serializers.ModelSerializer):
 
@@ -9,23 +10,8 @@ class VentasSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ventas
-        fields = ["id","fecha","total", "detallesVentas"]
-        # fields = ["id", "idproveedor", "proveedor", "subtotal", "fecha", "detallesCompra"]
+        fields = ["id", "fecha", "total", "detallesVentas"]
 
-
-    # def validate(self, data):
-    #     idproveedor = data.get('idproveedor')
-    #     subtotal = data.get('subtotal')
-    #     fecha = data.get('fecha')
-
-    #     instance_id = self.instance.id if self.instance else None
-
-    #     if Ventas.objects.filter(
-    #         idproveedor=idproveedor, subtotal=subtotal, fecha=fecha
-    #     ).exclude(id=instance_id).exists():
-    #         raise serializers.ValidationError("Ya existe una compra con esos campos")
-
-    #     return data
 
     def create(self, validated_data):
         detalles_data = validated_data.pop('detallesVentas')
@@ -33,13 +19,29 @@ class VentasSerializer(serializers.ModelSerializer):
         total = 0
 
         for detalle in detalles_data:
-            producto = detalle['idproducto']
+            producto = detalle["idproducto"]
             cantidad = detalle['cantidad']
-            total += producto.precio * cantidad
 
-        ventas = Ventas.objects.create(**validated_data)
+            if cantidad > producto.cantidad_actual:
+                raise ValueError(f"Stock insuficiente para el producto ({producto.nombre})")
+            
+            total = total + (producto.precio * cantidad)
+        
+        ventas = Ventas.objects.create(**validated_data, total=total)
 
         for detalle in detalles_data:
             DetallesVentas.objects.create(idventa=ventas, **detalle)
+            producto = detalle['idproducto']
+            cantidad = detalle['cantidad']
 
+            ProductosSerializer.reducir_cantidad_inventario(producto.id, cantidad)
+            NotificacionesSerializer.verificar_tope_minimo(producto)
+            # if producto.cantidad_actual <= producto.topeMin:
+            #     Notificaciones.objects.create(
+            #         productoId=producto,
+            #         mensaje=f"El producto '{producto.nombre}' ha alcanzado su tope mínimo, la cantidad actual es: ({producto.cantidad_actual})",
+            #     )
+
+        ventas.total = total
+        ventas.save()
         return ventas
