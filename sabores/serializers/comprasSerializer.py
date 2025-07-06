@@ -1,7 +1,10 @@
+from datetime import date
 from rest_framework import serializers
 from ..models import Compras, Proveedores, DetallesCompras
 from .proveedoresSerializer import ProveedoresSerializer
 from .detallesComprasSerializer import DetallesComprasSerializer
+from .productosSerializer import ProductosSerializer
+
 
 class ComprasSerializer(serializers.ModelSerializer):
     idproveedor = serializers.PrimaryKeyRelatedField(
@@ -15,23 +18,6 @@ class ComprasSerializer(serializers.ModelSerializer):
         model = Compras
         fields = ["id", "idproveedor", "proveedor", "subtotal", "fecha", "detallesCompra"]
 
-
-    def validate(self, data):
-        try:
-            idproveedor = data.get('idproveedor')
-            subtotal = data.get('subtotal')
-            fecha = data.get('fecha')
-
-            instance_id = self.instance.id if self.instance else None
-
-            if Compras.objects.filter(
-                idproveedor=idproveedor, subtotal=subtotal, fecha=fecha
-            ).exclude(id=instance_id).exists():
-                raise serializers.ValidationError("Ya existe una compra con esos campos")
-
-            return data
-        except Exception as e:
-            return {"Error": e}
 
     def create(self, validated_data):
         try:
@@ -48,6 +34,10 @@ class ComprasSerializer(serializers.ModelSerializer):
 
             for detalle in detalles_data:
                 DetallesCompras.objects.create(idcompra=compra, **detalle)
+                producto = detalle['idproducto']
+                cantidad = detalle['cantidad']
+                ProductosSerializer.aumentar_cantidad_inventario(producto.id, cantidad)
+                ProductosSerializer.aumentar_cantidad_inicial_inventario(producto.id, cantidad)
 
             return compra
         except Exception as e:
