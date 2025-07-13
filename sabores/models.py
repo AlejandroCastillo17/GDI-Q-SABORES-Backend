@@ -96,7 +96,6 @@ class AuthUserUserPermissions(models.Model):
 
 class Compras(models.Model):
     fecha = models.DateField()
-    idproveedor = models.ForeignKey('Proveedores', models.DO_NOTHING, db_column='idProveedor') 
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
@@ -104,11 +103,11 @@ class Compras(models.Model):
         db_table = 'compras'
 
     def __str__(self):
-        return '{} {} {}'.format(self.fecha, self.idproveedor, self.subtotal)
+        return '{} {}'.format(self.fecha, self.subtotal)
     
 
 class DetallesCompras(models.Model):
-    idcompra = models.ForeignKey(Compras, models.DO_NOTHING, db_column='idCompra', related_name='detallesCompra')
+    idcompra = models.ForeignKey(Compras, db_column='idCompra', related_name='detallesCompra', on_delete=models.CASCADE)
     idproducto = models.ForeignKey('Productos', models.DO_NOTHING, db_column='idProducto')
     cantidad = models.IntegerField()
 
