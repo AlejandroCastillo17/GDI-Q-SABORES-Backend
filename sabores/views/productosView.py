@@ -21,7 +21,7 @@ class ProductoView(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'])
     def eliminar_productos(self, request):
 
-        ids = request.data["ids"];
+        ids = request.data["ids"]
 
         if not isinstance(ids, list):
             return Response({"error": "Debes enviar una lista de IDs."}, status=status.HTTP_400_BAD_REQUEST)
@@ -29,6 +29,6 @@ class ProductoView(viewsets.ModelViewSet):
         productos_filtrados = Productos.objects.filter(id__in=ids)
         conteo_productos_filtrados = productos_filtrados.count()
 
-        productos_filtrados.delete();
+        productos_filtrados.delete()
 
         return Response({"message": f"Se han eliminado correctamente {conteo_productos_filtrados} productos"}, status=status.HTTP_204_NO_CONTENT);

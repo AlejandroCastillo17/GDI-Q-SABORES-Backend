@@ -17,7 +17,7 @@ class CategoriasView(viewsets.ModelViewSet):
 
     filter_backends = [filters.SearchFilter]
     search_fields = ['nombre'] # ''
-
+ 
     # @action(detail=False, methods=['POST'])
     # def eliminar_productos(self, request):
 
