@@ -8,13 +8,15 @@ class CategoriasSerializer(serializers.ModelSerializer):
         fields = ["id","nombre"]
 
     def validate(self, data):
-        nombre = data.get('nombre')
-        
-        instance_id = self.instance.id if self.instance else None
+        try:
+            nombre = data.get('nombre')
+            
+            instance_id = self.instance.id if self.instance else None
 
-        if Categorias.objects.filter(
-            nombre=nombre).exclude(id=instance_id).exists():
-            raise serializers.ValidationError("Ya existe una categoría con ese nombre")
+            if Categorias.objects.filter(
+                nombre=nombre).exclude(id=instance_id).exists():
+                raise serializers.ValidationError("Ya existe una categoría con ese nombre")
 
-        return data
-    
+            return data
+        except Exception as e:
+            raise e

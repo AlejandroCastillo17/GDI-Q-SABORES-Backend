@@ -8,7 +8,7 @@ class Gastos(models.Model):
     fecha_de_pago = models.DateField()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'Gastos'
 
 
@@ -18,20 +18,11 @@ class Usuario(models.Model):
     contrasena = models.CharField(max_length=50)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'Usuario'
         
     def __str__(self):
         return self.nombre, self.contrasena, self.id
-
-
-class Ventas(models.Model):
-    fecha = models.DateField()
-    subtotal = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'Ventas'
 
 
 class AuthGroup(models.Model):
@@ -105,32 +96,53 @@ class AuthUserUserPermissions(models.Model):
 
 class Compras(models.Model):
     fecha = models.DateField()
+    idproveedor = models.ForeignKey('Proveedores', models.DO_NOTHING, db_column='idProveedor') 
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'compras'
 
-class Detallescompras(models.Model):
-    idproducto = models.ForeignKey('Productos', models.DO_NOTHING, db_column='idProducto') 
-    idcompra = models.ForeignKey(Compras, models.DO_NOTHING, db_column='idCompra')
-    idproveedor = models.ForeignKey('Proveedores', models.DO_NOTHING, db_column='idProveedor')
+    def __str__(self):
+        return '{} {} {}'.format(self.fecha, self.idproveedor, self.subtotal)
+    
+
+class DetallesCompras(models.Model):
+    idcompra = models.ForeignKey(Compras, models.DO_NOTHING, db_column='idCompra', related_name='detallesCompra')
+    idproducto = models.ForeignKey('Productos', models.DO_NOTHING, db_column='idProducto')
     cantidad = models.IntegerField()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'detallesCompras'
 
+    def __str__(self):
+        return '{} {} {}'.format(self.idcompra, self.idproducto, self.cantidad)
 
-class Detallesventas(models.Model):
-    idventa = models.ForeignKey(Ventas, models.DO_NOTHING, db_column='idVenta')
+class Ventas(models.Model):
+    fecha = models.DateField()
+    total = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=False)
+
+    class Meta:
+        managed = True
+        db_table = 'Ventas'
+
+    def __str__(self):
+        return '{} {}'.format(self.fecha, self.total)
+
+class DetallesVentas(models.Model):
+    idventa = models.ForeignKey(Ventas, models.DO_NOTHING, db_column='idVenta', related_name="detallesVentas")
     idproducto = models.ForeignKey('Productos', models.DO_NOTHING, db_column='idProducto')
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
     cantidad = models.IntegerField()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'detallesVentas'
+
+    def __str__(self):
+        return '{} {} {} {}'.format(self.idventa, self.idproducto, self.cantidad, self.subtotal)
+
 
 
 class DjangoAdminLog(models.Model):
@@ -183,7 +195,7 @@ class Categorias(models.Model):#Qué con los proveedores con varios numeros
     nombre = models.CharField(max_length=20)
     
     class Meta:
-        managed = False
+        managed = True
         db_table = 'Categorias'
 
     def __str__(self):
@@ -197,13 +209,14 @@ class Proveedores(models.Model):#Qué con los proveedores con varios numeros
     email = models.CharField(max_length=250, null=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'proveedores'
     
     def __str__(self):
         return '{}'.format(self.nombre, self.telefono, self.email)
 
 class Productos(models.Model):
+    id = models.BigAutoField(primary_key=True)
     nombre = models.CharField(max_length=30)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     cantidad_actual = models.IntegerField()
@@ -214,10 +227,22 @@ class Productos(models.Model):
     categoriaid = models.ForeignKey(Categorias, models.DO_NOTHING, db_column='categoriaId', related_name="productos") 
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'productos'
         
     def __str__(self):
         return '{} {} {} {} {} {} {}'.format(self.nombre, self.precio, self.cantidad_actual, self.cantidad_inicial, self.foto, self.proveedorid, self.categoriaid, self.topeMin)
 
 
+class Notificaciones(models.Model):
+    productoId = models.ForeignKey(Productos, models.DO_NOTHING, db_column='productoId')
+    mensaje = models.TextField()
+    fecha = models.DateTimeField(auto_now_add=True)
+    leida = models.BooleanField(default=False)
+    
+    class Meta:
+        managed = True
+        db_table = 'notificaciones'
+        
+    def __str__(self):
+        return '{} {} {} {}'.format(self.productoId, self.mensaje, self.fecha, self.leida)

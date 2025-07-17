@@ -10,6 +10,7 @@ class GastosSerializer(serializers.ModelSerializer):
         model = Gastos
         fields = '__all__'
 
+
     # def validate(self, data):
     #     nombre = data.get('nombre')
         
