@@ -8,6 +8,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from django.db import transaction
+from rest_framework.exceptions import ValidationError
 
 
 class ComprasView(viewsets.ModelViewSet):
@@ -34,5 +35,5 @@ class ComprasView(viewsets.ModelViewSet):
         try:
             result = serializer.save()  # Esto ejecutará tu método update modificado
             return Response(result, status=result.get('code', 200))
-        except serializers.ValidationError as e:
+        except ValidationError as e:
             return Response(e.detail, status=e.detail.get('code', 400))

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import Compras, DetallesCompras
+from ..models import Compras, DetallesCompras, Productos
 from .detallesComprasSerializer import DetallesComprasSerializer
 from .productosSerializer import ProductosSerializer
 from django.db import transaction
@@ -31,7 +31,6 @@ class ComprasSerializer(serializers.ModelSerializer):
         try:
             with transaction.atomic():  # Todas las operaciones son atómicas
                 detalles_data = validated_data.pop('detallesCompra', [])
-                print("validated_data", validated_data)
                 # Validación básica de los datos entrantes
                 if not detalles_data:
                     raise serializers.ValidationError({"detallesCompra": "Debe proporcionar al menos un detalle de compra."})
@@ -59,7 +58,7 @@ class ComprasSerializer(serializers.ModelSerializer):
                 
         except Exception as e:
         # Registra el error completo (útil para depuración)
-            print(f"Error en update: {str(e)}", exc_info=True)
+            print(f"Error en update: {str(e)}")#, exc_info=True)
             raise serializers.ValidationError({
                 'status': 'error',
                 'code': 400,
@@ -78,12 +77,12 @@ class ComprasSerializer(serializers.ModelSerializer):
 
         for detalle_data in detalles_data:
             detalle_id = detalle_data.get('id')
-            print("detalle", detalle_data)#EL PROBLEMA ES QUE AQUI NO ESTÁ TRAYENDO EL ID, SI LO MANDA EL FRONTEND PERO EL BACKEND NO LO ESTÁ GESTIONANDO BIEN
+            print("detalle", detalle_data)
             if not detalle_id:
                 continue  # ignorar sin ID
             
             if detalle_id in detalles_existentes:
-                print("entra")
+                print("detalles_existentes[detalle_id]", detalles_existentes[detalle_id])
                 self._actualizar_detalle_existente(detalles_existentes[detalle_id], detalle_data)
             else:
                 raise serializers.ValidationError({
@@ -94,19 +93,30 @@ class ComprasSerializer(serializers.ModelSerializer):
     def _actualizar_detalle_existente(self, detalle, detalle_data):
         """Actualizar un detalle existente (sin crear ni eliminar)"""
         producto = detalle.idproducto
+        producto_nuevo = detalle_data.get('idproducto', producto)
         cantidad_original = detalle.cantidad
         cantidad_nueva = detalle_data.get('cantidad', cantidad_original)
 
+        if isinstance(producto_nuevo, int):
+            producto_nuevo = Productos.objects.get(id=producto_nuevo)
+
+        if isinstance(producto, int):
+            producto = Productos.objects.get(id=producto)
+
+        print("producto",producto_nuevo)
         # Solo modificar inventario si han pasado menos de 24 horas desde la creación
         ahora = timezone.now()
-        hace_24h = detalle.created_at + timedelta(hours=24)
-        print("hace_24h", hace_24h)
-        modificar_inventario = ahora <= hace_24h and cantidad_nueva != cantidad_original
-
+        hace_24h = detalle.created_at + timedelta(minutes=1)
+        modificar_inventario = (
+            ahora <= hace_24h and (
+                cantidad_nueva != cantidad_original or producto_nuevo.id != producto
+            )
+        )
+        print("modificar_inventario", modificar_inventario)
         if modificar_inventario:
             # Revertir cantidad anterior
-            ProductosSerializer.reducir_cantidad_inventario(producto.id, cantidad_original)
-            ProductosSerializer.reducir_cantidad_inicial_inventario(producto.id, cantidad_original)
+            ProductosSerializer.reducir_cantidad_inventario(producto, cantidad_original)
+            ProductosSerializer.reducir_cantidad_inicial_inventario(producto, cantidad_original)
 
         # Actualizar campos del detalle
         for attr, value in detalle_data.items():
@@ -115,8 +125,8 @@ class ComprasSerializer(serializers.ModelSerializer):
 
         if modificar_inventario:
             # Aplicar nueva cantidad al inventario
-            ProductosSerializer.aumentar_cantidad_inventario(producto.id, detalle.cantidad)
-            ProductosSerializer.aumentar_cantidad_inicial_inventario(producto.id, detalle.cantidad)
+            ProductosSerializer.aumentar_cantidad_inventario(producto, detalle.cantidad)
+            ProductosSerializer.aumentar_cantidad_inicial_inventario(producto, detalle.cantidad)
 
     
     def delete(self, instance):

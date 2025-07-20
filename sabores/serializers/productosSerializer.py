@@ -15,6 +15,8 @@ class ProductosSerializer(serializers.ModelSerializer):
     write_only=True)
     categoria = ProveedoresSerializer(source='categoriaid', read_only=True)
 
+    id = serializers.IntegerField(required=False)
+
     class Meta:
         model = Productos
         fields = [
