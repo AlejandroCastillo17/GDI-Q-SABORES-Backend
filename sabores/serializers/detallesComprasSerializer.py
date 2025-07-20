@@ -13,6 +13,7 @@ class DetallesComprasSerializer(serializers.ModelSerializer):
     class Meta:
         model = DetallesCompras
         fields = ["id", "idproducto", "producto", "cantidad"]
+        read_only_fields = ['created_at']
 
 
     

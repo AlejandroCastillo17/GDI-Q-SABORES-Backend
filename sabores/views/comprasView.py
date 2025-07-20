@@ -11,7 +11,7 @@ from django.db import transaction
 
 
 class ComprasView(viewsets.ModelViewSet):
-    queryset = Compras.objects.all()
+    queryset = Compras.objects.all().prefetch_related('detallesCompra')
     serializer_class = ComprasSerializer 
 
     authentication_classes = [TokenAuthentication]
@@ -25,3 +25,14 @@ class ComprasView(viewsets.ModelViewSet):
         ids = request.data.get('ids', [])
         self.queryset.filter(id__in=ids).delete()
         return Response(status=204)
+    
+    def update(self, request, pk):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        try:
+            result = serializer.save()  # Esto ejecutará tu método update modificado
+            return Response(result, status=result.get('code', 200))
+        except serializers.ValidationError as e:
+            return Response(e.detail, status=e.detail.get('code', 400))
