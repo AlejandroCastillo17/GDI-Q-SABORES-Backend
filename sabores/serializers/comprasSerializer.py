@@ -68,8 +68,7 @@ class ComprasSerializer(serializers.ModelSerializer):
 
  
     def _procesar_detalles_compra(self, instance, detalles_data):
-        """Solo actualiza los detalles existentes, no crea ni elimina"""
-        print("estoy en procesar detalles compras")
+
         print("detalles_data", detalles_data)
         detalles_existentes = {d.id: d for d in instance.detallesCompra.all()}
         print("detalles_existentes", detalles_existentes)
@@ -77,12 +76,10 @@ class ComprasSerializer(serializers.ModelSerializer):
 
         for detalle_data in detalles_data:
             detalle_id = detalle_data.get('id')
-            print("detalle", detalle_data)
             if not detalle_id:
                 continue  # ignorar sin ID
             
             if detalle_id in detalles_existentes:
-                print("detalles_existentes[detalle_id]", detalles_existentes[detalle_id])
                 self._actualizar_detalle_existente(detalles_existentes[detalle_id], detalle_data)
             else:
                 raise serializers.ValidationError({
@@ -97,36 +94,32 @@ class ComprasSerializer(serializers.ModelSerializer):
         cantidad_original = detalle.cantidad
         cantidad_nueva = detalle_data.get('cantidad', cantidad_original)
 
-        if isinstance(producto_nuevo, int):
-            producto_nuevo = Productos.objects.get(id=producto_nuevo)
+        producto_nuevo_id = producto_nuevo.id if hasattr(producto_nuevo, 'id') else producto_nuevo
+        producto_id = producto.id if hasattr(producto, 'id') else producto
 
-        if isinstance(producto, int):
-            producto = Productos.objects.get(id=producto)
+        # Para comparar productos correctamente
+        diferente_producto = producto_nuevo_id != producto_id
 
-        print("producto",producto_nuevo)
-        # Solo modificar inventario si han pasado menos de 24 horas desde la creación
         ahora = timezone.now()
-        hace_24h = detalle.created_at + timedelta(minutes=1)
+        hace_24h = detalle.created_at + timedelta(hours=24)
         modificar_inventario = (
             ahora <= hace_24h and (
-                cantidad_nueva != cantidad_original or producto_nuevo.id != producto
+                cantidad_nueva != cantidad_original or diferente_producto
             )
         )
-        print("modificar_inventario", modificar_inventario)
+        print("cantidad", cantidad_original, cantidad_nueva)
         if modificar_inventario:
-            # Revertir cantidad anterior
-            ProductosSerializer.reducir_cantidad_inventario(producto, cantidad_original)
-            ProductosSerializer.reducir_cantidad_inicial_inventario(producto, cantidad_original)
+            ProductosSerializer.reducir_cantidad_inventario(producto_id, cantidad_original)
+            ProductosSerializer.reducir_cantidad_inicial_inventario(producto_id, cantidad_original)
 
-        # Actualizar campos del detalle
         for attr, value in detalle_data.items():
             setattr(detalle, attr, value)
         detalle.save()
-
+        print("modificar_inventario", modificar_inventario)
         if modificar_inventario:
             # Aplicar nueva cantidad al inventario
-            ProductosSerializer.aumentar_cantidad_inventario(producto, detalle.cantidad)
-            ProductosSerializer.aumentar_cantidad_inicial_inventario(producto, detalle.cantidad)
+            ProductosSerializer.aumentar_cantidad_inventario(producto_nuevo_id, cantidad_nueva)
+            ProductosSerializer.aumentar_cantidad_inicial_inventario(producto_nuevo_id, cantidad_nueva)
 
     
     def delete(self, instance):
@@ -145,19 +138,3 @@ class ComprasSerializer(serializers.ModelSerializer):
             'cantidad': detalle.cantidad
         }
 
-
-
-    # def _crear_nuevo_detalle(self, instance, detalle_data):
-    #     """Crear un nuevo detalle de compra"""
-    #     if 'idproducto' not in detalle_data:
-    #         raise serializers.ValidationError({"idproducto": "Este campo es requerido."})
-
-    # def _revertir_cambios_inventario(self, detalle):
-    #     """Revertir cambios en el inventario para un detalle"""
-    #     ProductosSerializer.reducir_cantidad_inventario(detalle.idproducto.id, detalle.cantidad)
-    #     ProductosSerializer.reducir_cantidad_inicial_inventario(detalle.idproducto.id, detalle.cantidad)
-
-        
-    #     detalle = DetallesCompras.objects.create(idcompra=instance, **detalle_data)
-    #     ProductosSerializer.aumentar_cantidad_inventario(detalle.idproducto.id, detalle.cantidad)
-    #     ProductosSerializer.aumentar_cantidad_inicial_inventario(detalle.idproducto.id, detalle.cantidad)
