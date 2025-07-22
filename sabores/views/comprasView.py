@@ -24,7 +24,12 @@ class ComprasView(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def bulk_delete(self, request):
         ids = request.data.get('ids', [])
-        self.queryset.filter(id__in=ids).delete()
+        compras = self.queryset.filter(id__in=ids)
+
+        for compra in compras:
+            serializer = self.get_serializer()
+            serializer.delete(compra)  # Llama al método delete del serializer
+
         return Response(status=204)
     
     def update(self, request, pk):
