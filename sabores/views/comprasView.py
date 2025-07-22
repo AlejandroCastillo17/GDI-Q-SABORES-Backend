@@ -19,7 +19,7 @@ class ComprasView(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     filter_backends = [filters.SearchFilter]
-    search_fields = ['nombre', 'estado', "email"]
+    search_fields = ['estado', "email"]
 
     @action(detail=False, methods=['post'])
     def bulk_delete(self, request):
