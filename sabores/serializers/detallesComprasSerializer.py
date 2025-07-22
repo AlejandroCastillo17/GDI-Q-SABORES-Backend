@@ -10,9 +10,12 @@ class DetallesComprasSerializer(serializers.ModelSerializer):
         queryset=Productos.objects.all(), write_only=True) 
     producto = ProductosSerializer(source='idproducto', read_only=True)
 
+    id = serializers.IntegerField(required=False)
+
     class Meta:
         model = DetallesCompras
         fields = ["id", "idproducto", "producto", "cantidad"]
+        read_only_fields = ['created_at']
 
 
     

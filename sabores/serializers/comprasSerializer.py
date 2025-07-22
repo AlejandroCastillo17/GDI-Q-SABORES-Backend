@@ -1,67 +1,144 @@
-from datetime import date
 from rest_framework import serializers
-from ..models import Compras, Proveedores, DetallesCompras
-from .proveedoresSerializer import ProveedoresSerializer
+from ..models import Compras, DetallesCompras, Productos
 from .detallesComprasSerializer import DetallesComprasSerializer
 from .productosSerializer import ProductosSerializer
-
+from django.db import transaction
+from datetime import timedelta
+from django.utils import timezone
 
 class ComprasSerializer(serializers.ModelSerializer):
-    # idproveedor = serializers.PrimaryKeyRelatedField(
-    #     queryset=Proveedores.objects.all(), 
-    #     write_only=True
-    # ) 
-    # proveedor = ProveedoresSerializer(source='idproveedor', read_only=True)
     detallesCompra = DetallesComprasSerializer(many=True)
 
     class Meta:
         model = Compras
         fields = ["id", "subtotal", "fecha", "detallesCompra"]
 
-
     def create(self, validated_data):
-        try:
-            detalles_data = validated_data.pop('detallesCompra')
-                
-            for detalle in detalles_data:
-                producto = detalle['idproducto']
-                cantidad = detalle['cantidad']
+        detalles_data = validated_data.pop('detallesCompra', [])
+        compra = Compras.objects.create(**validated_data)
 
-            compra = Compras.objects.create(**validated_data)
+        for detalle in detalles_data:
+            producto = detalle['idproducto']
+            cantidad = detalle['cantidad']
+            DetallesCompras.objects.create(idcompra=compra, **detalle)
 
-            for detalle in detalles_data:
+            ProductosSerializer.aumentar_cantidad_inventario(producto.id, cantidad)
+            ProductosSerializer.aumentar_cantidad_inicial_inventario(producto.id, cantidad)
 
-                DetallesCompras.objects.create(idcompra=compra, **detalle)
-                
-                producto = detalle['idproducto']
-                cantidad = detalle['cantidad']
-                ProductosSerializer.aumentar_cantidad_inventario(producto.id, cantidad)
-                ProductosSerializer.aumentar_cantidad_inicial_inventario(producto.id, cantidad)
+        return compra
 
-            return compra
-        except Exception as e:
-            return {"Error": e};
+    def _serializar_detalle(self, detalle):
+        return {
+            'id': detalle.id,
+            'idproducto': detalle.idproducto.id,
+            'producto_nombre': detalle.idproducto.nombre,  # Asume que existe
+            'cantidad': detalle.cantidad
+        }
+
 
     def update(self, instance, validated_data):
-        detalles_data = validated_data.pop('detallesCompra')
-        
-        # Actualizar la compra principal
-        instance = super().update(instance, validated_data)
-        
-        # Actualizar o crear cada detalle
-        detalles = instance.detallesCompra.all()
-        detalles = {detalle.id: detalle for detalle in detalles}
-        
+        try:
+            with transaction.atomic():  # Todas las operaciones son atómicas
+                detalles_data = validated_data.pop('detallesCompra', [])
+                # Validación básica de los datos entrantes
+                if not detalles_data:
+                    raise serializers.ValidationError({"detallesCompra": "Debe proporcionar al menos un detalle de compra."})
+                
+                # Actualizar campos simples de la compra
+                instance.subtotal = validated_data.get('subtotal', instance.subtotal)
+                instance.fecha = validated_data.get('fecha', instance.fecha)
+                instance.save()
+
+                # Procesar detalles de compra
+                self._procesar_detalles_compra(instance, detalles_data)
+                
+                # Refrescar la instancia para incluir los cambios
+                instance.refresh_from_db()
+                return {
+                'status': 'success',
+                'code': 200,
+                'data': {
+                    'id': instance.id,
+                    'subtotal': instance.subtotal,
+                    'fecha': instance.fecha,
+                    'detalles': [self._serializar_detalle(d) for d in instance.detallesCompra.all()]
+                }
+            }
+                
+        except Exception as e:
+        # Registra el error completo (útil para depuración)
+            print(f"Error en update: {str(e)}")#, exc_info=True)
+            raise serializers.ValidationError({
+                'status': 'error',
+                'code': 400,
+                'message': str(e),
+                'details': getattr(e, 'detail', None)
+            })
+
+ 
+    def _procesar_detalles_compra(self, instance, detalles_data):
+
+        print("detalles_data", detalles_data)
+        detalles_existentes = {d.id: d for d in instance.detallesCompra.all()}
+        print("detalles_existentes", detalles_existentes)
+
+
         for detalle_data in detalles_data:
-            detalle_id = detalle_data.get('id', None)
-            if detalle_id in detalles:
-                detalle_serializer = DetallesComprasSerializer(
-                    detalles[detalle_id], 
-                    data=detalle_data
-                )
-                detalle_serializer.is_valid(raise_exception=True)
-                detalle_serializer.save()
+            detalle_id = detalle_data.get('id')
+            if not detalle_id:
+                continue  # ignorar sin ID
+            
+            if detalle_id in detalles_existentes:
+                self._actualizar_detalle_existente(detalles_existentes[detalle_id], detalle_data)
             else:
-                instance.detallesCompra.create(**detalle_data)
+                raise serializers.ValidationError({
+                    "id": f"Detalle con ID {detalle_id} no pertenece a esta compra."
+                })
+
+
+    def _actualizar_detalle_existente(self, detalle, detalle_data):
+        producto = detalle.idproducto
+        producto_nuevo = detalle_data.get('idproducto', producto)
+        cantidad_original = detalle.cantidad
+        cantidad_nueva = detalle_data.get('cantidad', cantidad_original)
+
+        producto_nuevo_id = producto_nuevo.id if hasattr(producto_nuevo, 'id') else producto_nuevo
+        producto_id = producto.id if hasattr(producto, 'id') else producto
+
+        # Para comparar productos correctamente
+        diferente_producto = producto_nuevo_id != producto_id
+
+        ahora = timezone.now()
+        hace_24h = detalle.created_at + timedelta(hours=24)
+        modificar_inventario = (
+            ahora <= hace_24h and (
+                cantidad_nueva != cantidad_original or diferente_producto
+            )
+        )
+
+        if modificar_inventario:
+            ProductosSerializer.reducir_cantidad_inventario(producto_id, cantidad_original)
+            ProductosSerializer.reducir_cantidad_inicial_inventario(producto_id, cantidad_original)
+
+        for attr, value in detalle_data.items():
+            setattr(detalle, attr, value)
         
-        return instance
+        detalle.save()
+
+        if modificar_inventario:
+            ProductosSerializer.aumentar_cantidad_inventario(producto_nuevo_id, cantidad_nueva)
+            ProductosSerializer.aumentar_cantidad_inicial_inventario(producto_nuevo_id, cantidad_nueva)
+
+    def _revertir_inventario_si_aplica(self, detalle):
+        ahora = timezone.now()
+        if ahora <= detalle.created_at + timedelta(hours=24):
+            producto_id = detalle.idproducto.id
+            cantidad = detalle.cantidad
+            ProductosSerializer.reducir_cantidad_inventario(producto_id, cantidad)
+            ProductosSerializer.reducir_cantidad_inicial_inventario(producto_id, cantidad)
+
+    def delete(self, instance):
+        for detalle in instance.detallesCompra.all():
+            self._revertir_inventario_si_aplica(detalle)
+        instance.delete()
+

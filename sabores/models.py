@@ -110,6 +110,8 @@ class DetallesCompras(models.Model):
     idcompra = models.ForeignKey(Compras, db_column='idCompra', related_name='detallesCompra', on_delete=models.CASCADE)
     idproducto = models.ForeignKey('Productos', models.DO_NOTHING, db_column='idProducto')
     cantidad = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
 
     class Meta:
         managed = True

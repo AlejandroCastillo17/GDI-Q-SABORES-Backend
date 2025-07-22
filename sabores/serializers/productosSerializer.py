@@ -15,6 +15,8 @@ class ProductosSerializer(serializers.ModelSerializer):
     write_only=True)
     categoria = ProveedoresSerializer(source='categoriaid', read_only=True)
 
+    id = serializers.IntegerField(required=False)
+
     class Meta:
         model = Productos
         fields = [
@@ -80,6 +82,15 @@ class ProductosSerializer(serializers.ModelSerializer):
         else:
          raise serializers.ValidationError("No existe ese producto con esas caracteristicas")
         
+    def reducir_cantidad_inicial_inventario(idproducto, cantidad_reducir):
+        producto = Productos.objects.get(id=idproducto)
+
+        if producto:
+            producto.cantidad_inicial = producto.cantidad_inicial - cantidad_reducir
+            producto.save()
+        else:
+            raise serializers.ValidationError("No existe ese producto con esas caracteristicas")
+                
     
     # def guardar_tope_minim(idproducto):
     #     producto = Productos.objects.get(id=idproducto)
