@@ -118,9 +118,9 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 #        'ENGINE': 'django.db.backends.mysql',
 #        'NAME': 'railway',
 #        'USER': 'root',
-#        'PASSWORD': 'fzJvSmmEZSndmjOrARyukIrlUFVEWqmM',
-#        'HOST': 'metro.proxy.rlwy.net',  # Usa el valor real de RAILWAY_PRIVATE_DOMAIN
-#        'PORT': '28745',
+#        'PASSWORD': 'ooNKCYQLkbAkHPRVqOftNPfZolkNdIvZ',
+#        'HOST': 'centerbeam.proxy.rlwy.net',  # Usa el valor real de RAILWAY_PRIVATE_DOMAIN
+#        'PORT': '50274',
 #     }
 # }
 
