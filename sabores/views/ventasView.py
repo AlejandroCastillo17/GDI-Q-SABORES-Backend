@@ -14,3 +14,8 @@ class VentasView(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter]
     search_fields = ['fecha', 'producto']
 
+    # @action(detail=False, methods=['post'])
+    # def bulk_delete(self, request):
+    #     ids = request.data.get('ids', [])
+    #     self.queryset.filter(id__in=ids).delete()
+    #     return Response(status=204)
