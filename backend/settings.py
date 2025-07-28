@@ -13,7 +13,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import pymysql
 pymysql.install_as_MySQLdb()
-
+import os
+from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -125,16 +127,33 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # }
 
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+dotenv_path = os.path.join(BASE_DIR, '.env')
+
+load_dotenv(dotenv_path)
+
+SECRET_KEY = os.environ.get('QSABORES_SECRET_KEY')
+DEBUG = os.environ.get('DEBUG') == 'True' # Convierte a booleano si es necesario
+
 DATABASES = {
     'default': {
-       'ENGINE': 'django.db.backends.mysql',
-       'NAME': 'sabores_dev',
-       'USER': 'root',
-       'PASSWORD': 'root',
-       'HOST': '127.0.0.1',  # Usa el valor real de RAILWAY_PRIVATE_DOMAIN
-       'PORT': '3306',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('QSABORES_DB_NAME'),
+        'USER': os.environ.get('QSABORES_USER'),
+        'PASSWORD': os.environ.get('QSABORES_PASSWORD'),
+        'HOST': os.environ.get('QSABORES_HOST'),
+        'PORT': os.environ.get('QSABORES_PORT'),
     }
 }
+
+# 'default': {
+#        'ENGINE': 'django.db.backends.mysql',
+#        'NAME': 'sabores_dev',
+#        'USER': 'root',
+#        'PASSWORD': 'root',
+#        'HOST': '127.0.0.1',  # Usa el valor real de RAILWAY_PRIVATE_DOMAIN
+#        'PORT': '3306',
+#     }
 
 
 # Password validation
