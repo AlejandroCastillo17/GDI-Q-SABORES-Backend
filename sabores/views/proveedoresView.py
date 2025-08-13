@@ -17,6 +17,12 @@ class ProveedoresView(viewsets.ModelViewSet):
 
     filter_backends = [filters.SearchFilter]
     search_fields = ['nombre', 'estado', "email"] # ''
+    
+    @action(detail=False, methods=['post'])
+    def bulk_delete(self, request):
+        ids = request.data.get('ids', [])
+        self.queryset.filter(id__in=ids).delete()
+        return Response(status=204)
 
     # @action(detail=False, methods=['POST'])
     # def eliminar_productos(self, request):

@@ -3,6 +3,7 @@ from ..models import Proveedores, Categorias
 from ..models import Productos
 from django.contrib.auth.models import User
 from .proveedoresSerializer import ProveedoresSerializer
+from .categoriasSerializer import CategoriasSerializer
 
         
 class ProductosSerializer(serializers.ModelSerializer):
@@ -13,7 +14,7 @@ class ProductosSerializer(serializers.ModelSerializer):
     categoriaid = serializers.PrimaryKeyRelatedField(
     queryset=Categorias.objects.all(), 
     write_only=True)
-    categoria = ProveedoresSerializer(source='categoriaid', read_only=True)
+    categoria = CategoriasSerializer(source='categoriaid', read_only=True)
 
     id = serializers.IntegerField(required=False)
 
@@ -76,7 +77,11 @@ class ProductosSerializer(serializers.ModelSerializer):
         producto = Productos.objects.get(id=idproducto)
 
         if producto:
-            producto.cantidad_inicial = producto.cantidad_inicial + cantidad_aumentar
+            print("producto", producto.cantidad_actual)
+            if producto.cantidad_actual == 0:
+                producto.cantidad_inicial = cantidad_aumentar
+            else:
+                producto.cantidad_inicial = producto.cantidad_inicial + cantidad_aumentar
 
             producto.save()
         else:
