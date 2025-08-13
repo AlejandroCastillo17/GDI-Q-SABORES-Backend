@@ -22,8 +22,8 @@ class ComprasSerializer(serializers.ModelSerializer):
             cantidad = detalle['cantidad']
             DetallesCompras.objects.create(idcompra=compra, **detalle)
 
-            ProductosSerializer.aumentar_cantidad_inventario(producto.id, cantidad)
             ProductosSerializer.aumentar_cantidad_inicial_inventario(producto.id, cantidad)
+            ProductosSerializer.aumentar_cantidad_inventario(producto.id, cantidad)
 
         return compra
 
