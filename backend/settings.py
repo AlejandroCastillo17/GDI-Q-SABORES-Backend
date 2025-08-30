@@ -135,14 +135,25 @@ load_dotenv(dotenv_path)
 SECRET_KEY = os.environ.get('QSABORES_SECRET_KEY')
 DEBUG = os.environ.get('DEBUG') == 'True' # Convierte a booleano si es necesario
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': os.environ.get('QSABORES_DB_NAME'),
+#         'USER': os.environ.get('QSABORES_USER'),
+#         'PASSWORD': os.environ.get('QSABORES_PASSWORD'),
+#         'HOST': os.environ.get('QSABORES_HOST'),
+#         'PORT': os.environ.get('QSABORES_PORT'),
+#     }
+# }
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('QSABORES_DB_NAME'),
-        'USER': os.environ.get('QSABORES_USER'),
-        'PASSWORD': os.environ.get('QSABORES_PASSWORD'),
-        'HOST': os.environ.get('QSABORES_HOST'),
-        'PORT': os.environ.get('QSABORES_PORT'),
+'default': {
+       'ENGINE': 'django.db.backends.mysql',
+       'NAME': 'sabores_dev',
+       'USER': 'root',
+       'PASSWORD': 'root',
+       'HOST': '127.0.0.1',  # Usa el valor real de RAILWAY_PRIVATE_DOMAIN
+       'PORT': '3306',
     }
 }
 
