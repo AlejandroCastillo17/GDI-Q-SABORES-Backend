@@ -5,7 +5,8 @@ djangorestframework
 PyMySQL
 sqlparse
 djangorestframework-simplejwt
-python-dotenv #Esto es usa la ultima versión de los paquetes
+python-dotenv
+cryptography #Esto es usa la ultima versión de los paquetes
 
 #pip install -r requirements.txt de esta manera se corre el requirement
 #source venv/bin/activate   # Linux/macOS
