@@ -146,6 +146,17 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+# 'default': {
+#        'ENGINE': 'django.db.backends.mysql',
+#        'NAME': 'sabores_dev',
+#        'USER': 'root',
+#        'PASSWORD': 'root',
+#        'HOST': '127.0.0.1',  # Usa el valor real de RAILWAY_PRIVATE_DOMAIN
+#        'PORT': '3306',
+#     }
+# }
+
 # 'default': {
 #        'ENGINE': 'django.db.backends.mysql',
 #        'NAME': 'sabores_dev',

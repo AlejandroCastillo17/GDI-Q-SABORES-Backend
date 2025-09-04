@@ -1,5 +1,5 @@
 from django.db import models
-
+from .softDeleteAbstractModel import SoftDeleteModel
 
 class Gastos(models.Model):
     nombre = models.CharField(max_length=50)
@@ -191,7 +191,7 @@ class DjangoSession(models.Model):
         db_table = 'django_session'
 
 
-class Categorias(models.Model):#Qué con los proveedores con varios numeros
+class Categorias(SoftDeleteModel):#Qué con los proveedores con varios numeros
     id = models.BigAutoField(primary_key=True)
     nombre = models.CharField(max_length=20)
     
@@ -203,7 +203,7 @@ class Categorias(models.Model):#Qué con los proveedores con varios numeros
         return '{}'.format(self.nombre)
 
 
-class Proveedores(models.Model):#Qué con los proveedores con varios numeros
+class Proveedores(SoftDeleteModel):#Qué con los proveedores con varios numeros
     id = models.BigAutoField(primary_key=True)
     nombre = models.CharField(max_length=20)
     telefono = models.CharField(max_length=11, blank=True, null=False)
@@ -216,7 +216,7 @@ class Proveedores(models.Model):#Qué con los proveedores con varios numeros
     def __str__(self):
         return '{}'.format(self.nombre, self.telefono, self.email)
 
-class Productos(models.Model):
+class Productos(SoftDeleteModel):
     id = models.BigAutoField(primary_key=True)
     nombre = models.CharField(max_length=30)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
