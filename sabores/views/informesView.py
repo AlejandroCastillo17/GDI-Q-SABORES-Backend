@@ -24,14 +24,14 @@ class InformesView(viewsets.ModelViewSet):
             informe_productos = []
             for p in productos:
                 if p.cantidad_inicial > 0 and (p.cantidad_inicial != p.cantidad_actual):
-                    porcentaje_vendido = round(((p.cantidad_inicial - p.cantidad_actual)/p.cantidad_inicial)*100, 2)
+                    porcentaje_vendido = round(((p.cantidad_inicial - p.cantidad_actual)/p.cantidad_inicial)*100)
                 else:
                     porcentaje_vendido = 0
 
                 informe_productos.append({
                     "nombre": p.nombre,
                     "cantidad_actual": p.cantidad_actual,
-                    "estado": f"{porcentaje_vendido}%",
+                    "estado": f"{porcentaje_vendido}",
                     "proveedor": p.proveedorid.nombre if p.proveedorid else None
                 })
             return Response({
