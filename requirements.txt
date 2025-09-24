@@ -7,6 +7,8 @@ sqlparse
 djangorestframework-simplejwt
 python-dotenv
 cryptography #Esto es usa la ultima versión de los paquetes
+gunicorn
+
 
 #pip install -r requirements.txt de esta manera se corre el requirement
 #source venv/bin/activate   # Linux/macOS
