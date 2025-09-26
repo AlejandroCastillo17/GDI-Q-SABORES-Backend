@@ -214,3 +214,9 @@ CORS_ALLOWED_ORIGINS = [
     'http://qsabores-frontend-wxxsbr-6d0816-72-60-26-170.traefik.me',
     'http://qsabores-backend-dacpsw-8612bd-72-60-26-170.traefik.me'
 ]
+
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'qsabores-backend-dacpsw-8612bd-72-60-26-170.traefik.me',
+]
