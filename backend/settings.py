@@ -212,5 +212,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',  # Si estás desarrollando en local
     'http://qsabores-frontend-wxxsbr-6d0816-72-60-26-170.traefik.me',
-    'qsabores-backend-dacpsw-8612bd-72-60-26-170.traefik.me'
+    'http://qsabores-backend-dacpsw-8612bd-72-60-26-170.traefik.me'
 ]
