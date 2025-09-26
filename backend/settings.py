@@ -211,5 +211,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # lista de servidores que se pueden conectar a django 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',  # Si estás desarrollando en local
-    'http://qsabores-frontend-wxxsbr-6d0816-72-60-26-170.traefik.me',  # Tu dominio de frontend en producción
+    # 'http://qsabores-frontend-wxxsbr-6d0816-72-60-26-170.traefik.me',  # Tu dominio de frontend en producción
 ]
