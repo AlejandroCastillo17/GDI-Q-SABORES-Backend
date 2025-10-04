@@ -7,36 +7,45 @@ from ..models import Notificaciones
 class NotificacionesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notificaciones
-        fields = ['id', 'productoId', 'mensaje', 'fecha', 'leida']
+        fields = ['id', 'productoId', 'fecha', 'leida']
 
         # sabores/signals.py
 
 
     # @receiver(post_save, sender=Productos)
+    @staticmethod
     def verificar_tope_minimo(producto):
         try:
             if producto.cantidad_actual <= producto.topeMin:
-                notificacion_existente = Notificaciones.objects.filter(
+                notificacion, creada = Notificaciones.objects.get_or_create(
                     productoId=producto,
                     leida=False
-                ).exists()
+                )
 
-                if not notificacion_existente:
-                    Notificaciones.objects.create(
-                        productoId=producto,
-                        mensaje=f"El producto '{producto.nombre}' ha alcanzado su tope mínimo, la cantidad actual es: ({producto.cantidad_actual})"
-                    )
+                if creada:
+                    estado = "created"
                 else:
-                    Notificaciones.objects.update(
-                        productoId=producto,
-                        mensaje=f"El producto '{producto.nombre}' ha alcanzado su tope mínimo, la cantidad actual es: ({producto.cantidad_actual})"
-                    )
+                    estado = "already_exists"
+
             else:
-                Notificaciones.objects.filter(
+                # Si ya superó el tope, marcar como leída (no eliminar)
+                updated = Notificaciones.objects.filter(
                     productoId=producto,
                     leida=False
                 ).update(leida=True)
+                estado = "marked_as_read" if updated else "no_action"
+
+            # Respuesta con datos del producto
+            return {
+                "status": estado,
+                "producto": {
+                    "id": producto.id,
+                    "nombre": producto.nombre,
+                    "cantidad_actual": producto.cantidad_actual,
+                    "topeMin": producto.topeMin
+                }
+            }
 
         except Exception as e:
-            print(e)
-            return e
+            print(f"Error en verificar_tope_minimo: {e}")
+            return {"status": "error", "message": str(e)}

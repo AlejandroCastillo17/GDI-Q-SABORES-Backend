@@ -5,6 +5,7 @@ from .productosSerializer import ProductosSerializer
 from django.db import transaction
 from datetime import timedelta
 from django.utils import timezone
+from .notificacionesSerializer import NotificacionesSerializer
 
 class ComprasSerializer(serializers.ModelSerializer):
     detallesCompra = DetallesComprasSerializer(many=True)
@@ -15,7 +16,12 @@ class ComprasSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         detalles_data = validated_data.pop('detallesCompra', [])
+        if not detalles_data:
+            raise serializers.ValidationError({"detallesCompra": "Debe proporcionar al menos un detalle de compra."})
+
         compra = Compras.objects.create(**validated_data)
+
+        productos_afectados = set()
 
         for detalle in detalles_data:
             producto = detalle['idproducto']
@@ -24,6 +30,12 @@ class ComprasSerializer(serializers.ModelSerializer):
 
             ProductosSerializer.aumentar_cantidad_inicial_inventario(producto.id, cantidad)
             ProductosSerializer.aumentar_cantidad_inventario(producto.id, cantidad)
+            
+            productos_afectados.add(producto)
+
+        for producto in productos_afectados:
+            NotificacionesSerializer.verificar_tope_minimo(producto)
+
 
         return compra
 
@@ -54,6 +66,10 @@ class ComprasSerializer(serializers.ModelSerializer):
                 
                 # Refrescar la instancia para incluir los cambios
                 instance.refresh_from_db()
+
+                for detalle in instance.detallesCompra.all():
+                    NotificacionesSerializer.verificar_tope_minimo(detalle)
+
                 return {
                 'status': 'success',
                 'code': 200,
@@ -64,6 +80,7 @@ class ComprasSerializer(serializers.ModelSerializer):
                     'detalles': [self._serializar_detalle(d) for d in instance.detallesCompra.all()]
                 }
             }
+
                 
         except Exception as e:
         # Registra el error completo (útil para depuración)
@@ -78,10 +95,7 @@ class ComprasSerializer(serializers.ModelSerializer):
  
     def _procesar_detalles_compra(self, instance, detalles_data):
 
-        print("detalles_data", detalles_data)
         detalles_existentes = {d.id: d for d in instance.detallesCompra.all()}
-        print("detalles_existentes", detalles_existentes)
-
 
         for detalle_data in detalles_data:
             detalle_id = detalle_data.get('id')
@@ -117,28 +131,36 @@ class ComprasSerializer(serializers.ModelSerializer):
         )
 
         if modificar_inventario:
+        # Primero revertir el inventario del producto original
             ProductosSerializer.reducir_cantidad_inventario(producto_id, cantidad_original)
             ProductosSerializer.reducir_cantidad_inicial_inventario(producto_id, cantidad_original)
+            NotificacionesSerializer.verificar_tope_minimo(producto)
 
         for attr, value in detalle_data.items():
             setattr(detalle, attr, value)
-        
         detalle.save()
 
         if modificar_inventario:
+            # Luego aumentar inventario del nuevo producto
             ProductosSerializer.aumentar_cantidad_inventario(producto_nuevo_id, cantidad_nueva)
             ProductosSerializer.aumentar_cantidad_inicial_inventario(producto_nuevo_id, cantidad_nueva)
+            NotificacionesSerializer.verificar_tope_minimo(producto_nuevo)
 
     def _revertir_inventario_si_aplica(self, detalle):
         ahora = timezone.now()
         if ahora <= detalle.created_at + timedelta(hours=24):
-            producto_id = detalle.idproducto.id
-            cantidad = detalle.cantidad
-            ProductosSerializer.reducir_cantidad_inventario(producto_id, cantidad)
-            ProductosSerializer.reducir_cantidad_inicial_inventario(producto_id, cantidad)
+            try:
+                producto_id = detalle.idproducto.id
+                cantidad = detalle.cantidad
+                ProductosSerializer.reducir_cantidad_inventario(producto_id, cantidad)
+                ProductosSerializer.reducir_cantidad_inicial_inventario(producto_id, cantidad)
+                NotificacionesSerializer.verificar_tope_minimo(detalle.idproducto)
+            except Exception as e:
+                print(f"Advertencia: no se pudo revertir inventario para el detalle {detalle.id}: {e}")
 
     def delete(self, instance):
         for detalle in instance.detallesCompra.all():
             self._revertir_inventario_si_aplica(detalle)
         instance.delete()
+        return {"status": "success", "message": f"Compra {instance.id} eliminada correctamente"}
 

@@ -237,7 +237,6 @@ class Productos(SoftDeleteModel):
 
 class Notificaciones(models.Model):
     productoId = models.ForeignKey(Productos, models.DO_NOTHING, db_column='productoId')
-    mensaje = models.TextField()
     fecha = models.DateTimeField(auto_now_add=True)
     leida = models.BooleanField(default=False)
     

@@ -4,6 +4,7 @@ from ..models import Productos
 from django.contrib.auth.models import User
 from .proveedoresSerializer import ProveedoresSerializer
 from .categoriasSerializer import CategoriasSerializer
+from django.db.models import F
 
         
 class ProductosSerializer(serializers.ModelSerializer):
@@ -52,26 +53,43 @@ class ProductosSerializer(serializers.ModelSerializer):
         except Exception as e:
             return e
 
+    @staticmethod
     def reducir_cantidad_inventario(idproducto, cantidad_reducir):
-        producto = Productos.objects.get(id=idproducto)
+        try:
+            producto = Productos.objects.get(id=idproducto)
+        except Productos.DoesNotExist:
+            raise serializers.ValidationError(
+                {"producto": f"No existe un producto con id={idproducto}"}
+            )
 
-        if producto:
-            producto.cantidad_actual = producto.cantidad_actual - cantidad_reducir
+        if producto.cantidad_actual < cantidad_reducir:
+            raise serializers.ValidationError(
+                {"cantidad": "No hay suficiente stock para reducir esa cantidad."}
+            )
 
-            producto.save()
-        else:
-         raise serializers.ValidationError("No existe ese producto con esas caracteristicas")
+        producto.cantidad_actual = F('cantidad_actual') - cantidad_reducir
+        producto.save(update_fields=['cantidad_actual'])
+        producto.refresh_from_db()  # Refresca el valor actualizado desde la BD
+
+        return producto
         
-        
+    @staticmethod
     def aumentar_cantidad_inventario(idproducto, cantidad_aumentar):
-        producto = Productos.objects.get(id=idproducto)
+        """
+        Aumenta la cantidad_actual de un producto de forma atómica y segura.
+        """
+        try:
+            producto = Productos.objects.get(id=idproducto)
+        except Productos.DoesNotExist:
+            raise serializers.ValidationError(
+                {"producto": f"No existe un producto con id={idproducto}"}
+            )
 
-        if producto:
-            producto.cantidad_actual = producto.cantidad_actual + cantidad_aumentar
+        producto.cantidad_actual = F('cantidad_actual') + cantidad_aumentar
+        producto.save(update_fields=['cantidad_actual'])
+        producto.refresh_from_db()
 
-            producto.save()
-        else:
-         raise serializers.ValidationError("No existe ese producto con esas caracteristicas")
+        return producto
         
     def aumentar_cantidad_inicial_inventario(idproducto, cantidad_aumentar):
         producto = Productos.objects.get(id=idproducto)
