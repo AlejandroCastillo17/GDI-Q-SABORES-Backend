@@ -1,13 +1,18 @@
 from rest_framework import serializers
 from ..models import Notificaciones
-
+from ..models import Productos
+from .productosSerializer import ProductosSerializer
 # from django.db.models.signals import post_save
 # from django.dispatch import receiver
 
 class NotificacionesSerializer(serializers.ModelSerializer):
+
+    productoId = serializers.PrimaryKeyRelatedField(
+        queryset=Productos.objects.all(), write_only=True) 
+    producto = ProductosSerializer(source='productoId', read_only=True)
     class Meta:
         model = Notificaciones
-        fields = ['id', 'productoId', 'fecha', 'leida']
+        fields = ['id', 'productoId', 'producto', 'fecha', 'leida']
 
         # sabores/signals.py
 
@@ -36,9 +41,12 @@ class NotificacionesSerializer(serializers.ModelSerializer):
                 estado = "marked_as_read" if updated else "no_action"
 
             # Respuesta con datos del producto
+            print(producto)
             return {
                 "status": estado,
-                "producto": {
+                "producto": 
+                
+                {
                     "id": producto.id,
                     "nombre": producto.nombre,
                     "cantidad_actual": producto.cantidad_actual,
