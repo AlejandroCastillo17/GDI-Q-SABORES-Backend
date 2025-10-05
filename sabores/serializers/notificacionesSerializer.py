@@ -20,8 +20,10 @@ class NotificacionesSerializer(serializers.ModelSerializer):
     # @receiver(post_save, sender=Productos)
     @staticmethod
     def verificar_tope_minimo(producto):
+        print("producto", producto)
         try:
             if producto.cantidad_actual <= producto.topeMin:
+                print("entra x2")
                 notificacion, creada = Notificaciones.objects.get_or_create(
                     productoId=producto,
                     leida=False
@@ -38,10 +40,10 @@ class NotificacionesSerializer(serializers.ModelSerializer):
                     productoId=producto,
                     leida=False
                 ).update(leida=True)
+                print("update", updated)
                 estado = "marked_as_read" if updated else "no_action"
 
             # Respuesta con datos del producto
-            print(producto)
             return {
                 "status": estado,
                 "producto": 

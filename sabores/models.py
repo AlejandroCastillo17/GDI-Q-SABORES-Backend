@@ -5,7 +5,7 @@ class Gastos(models.Model):
     nombre = models.CharField(max_length=50)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     estado = models.CharField(max_length=20)
-    fecha_de_pago = models.DateField()
+    fecha_de_pago = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         managed = True
@@ -95,7 +95,7 @@ class AuthUserUserPermissions(models.Model):
 
 
 class Compras(models.Model):
-    fecha = models.DateField()
+    fecha = models.DateTimeField(auto_now_add=True)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
@@ -121,7 +121,7 @@ class DetallesCompras(models.Model):
         return '{} {} {}'.format(self.idcompra, self.idproducto, self.cantidad)
 
 class Ventas(models.Model):
-    fecha = models.DateField()
+    fecha = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=False)
 
     class Meta:

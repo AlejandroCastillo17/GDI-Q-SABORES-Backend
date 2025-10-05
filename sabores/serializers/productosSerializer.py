@@ -95,11 +95,11 @@ class ProductosSerializer(serializers.ModelSerializer):
         producto = Productos.objects.get(id=idproducto)
 
         if producto:
-            print("producto", producto.cantidad_actual)
-            if producto.cantidad_actual == 0:
+            print("producto", producto.cantidad_inicial)
+            if producto.cantidad_inicial == 0:
                 producto.cantidad_inicial = cantidad_aumentar
             else:
-                producto.cantidad_inicial = producto.cantidad_actual + cantidad_aumentar
+                producto.cantidad_inicial = producto.cantidad_inicial + cantidad_aumentar
 
             producto.save()
         else:

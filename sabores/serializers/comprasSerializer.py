@@ -68,7 +68,8 @@ class ComprasSerializer(serializers.ModelSerializer):
                 instance.refresh_from_db()
 
                 for detalle in instance.detallesCompra.all():
-                    NotificacionesSerializer.verificar_tope_minimo(detalle)
+                    print("detalle", detalle.idproducto)
+                    NotificacionesSerializer.verificar_tope_minimo(detalle.idproducto)
 
                 return {
                 'status': 'success',
@@ -134,7 +135,7 @@ class ComprasSerializer(serializers.ModelSerializer):
         # Primero revertir el inventario del producto original
             ProductosSerializer.reducir_cantidad_inventario(producto_id, cantidad_original)
             ProductosSerializer.reducir_cantidad_inicial_inventario(producto_id, cantidad_original)
-            NotificacionesSerializer.verificar_tope_minimo(producto)
+            # NotificacionesSerializer.verificar_tope_minimo(producto)
 
         for attr, value in detalle_data.items():
             setattr(detalle, attr, value)
@@ -144,7 +145,7 @@ class ComprasSerializer(serializers.ModelSerializer):
             # Luego aumentar inventario del nuevo producto
             ProductosSerializer.aumentar_cantidad_inventario(producto_nuevo_id, cantidad_nueva)
             ProductosSerializer.aumentar_cantidad_inicial_inventario(producto_nuevo_id, cantidad_nueva)
-            NotificacionesSerializer.verificar_tope_minimo(producto_nuevo)
+            # NotificacionesSerializer.verificar_tope_minimo(producto_nuevo)
 
     def _revertir_inventario_si_aplica(self, detalle):
         ahora = timezone.now()
